@@ -21,6 +21,7 @@ git clone --depth=1 https://chromium.googlesource.com/external/gyp build/gyp
 
 # for generating .bundle project
 sed -i -e s/\'type\'.*/\'type\':\'loadable_module\',\'mac_bundle\':1,/ uv.gyp
+
 ./gyp_uv.py -f xcode
 
 xcodebuild \

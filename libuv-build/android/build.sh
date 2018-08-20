@@ -22,6 +22,7 @@ git clone --depth=1 --branch=v$VERSION https://github.com/libuv/libuv.git $TMP_D
 pushd "$TMP_DIR/libuv"
 
 git clone --depth=1 https://chromium.googlesource.com/external/gyp build/gyp
+
 source ./android-configure $NDK_HOME gyp 21
 make BUILDTYPE=Release -C out
 

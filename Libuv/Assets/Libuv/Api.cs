@@ -26,17 +26,6 @@ namespace Libuv
 
         // loops
 
-        public enum RunMode
-        {
-            Default = 0,
-            Once,
-            Nowait,
-        }
-        public enum LoopOption
-        {
-            BlockSignal = 0
-        }
-
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void WalkCb(IntPtr handle, IntPtr arg);
 
@@ -61,10 +50,10 @@ namespace Libuv
         [DllImport("libuv")]
         extern public static int uv_backend_timeout(IntPtr loop);
         [DllImport("libuv")]
-        extern public static long uv_now(IntPtr loop);
+        extern public static ulong uv_now(IntPtr loop);
         [DllImport("libuv")]
         extern public static void uv_update_time(IntPtr loop);
-        [DllImport("libuv", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libuv")]
         extern public static void uv_walk(IntPtr loop, WalkCb walkCb, IntPtr arg);
         [DllImport("libuv")]
         extern public static int uv_loop_fork(IntPtr loop);
@@ -74,28 +63,6 @@ namespace Libuv
         extern public static IntPtr uv_loop_set_data(IntPtr loop, IntPtr data);
 
         // handles
-        public enum HandleType
-        {
-            UnknownHandle = 0,
-            Async,
-            Check,
-            FsEvent,
-            FsPoll,
-            Handle,
-            Idle,
-            NamedPipe,
-            Poll,
-            Prepare,
-            Process,
-            Stream,
-            Tcp,
-            Timer,
-            Tty,
-            Udp,
-            Signal,
-            File,
-        }
-
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void AllocCb(IntPtr handle, int suggested_size, ref Buf buf);
 
@@ -135,21 +102,6 @@ namespace Libuv
 
         // Base request
 
-        public enum ReqType
-        {
-            UnknownReq,
-            Req,
-            Connect,
-            Write,
-            Shutdown,
-            UdpSend,
-            Fs,
-            Work,
-            Getaddrinfo,
-            Getnameinfo,
-            Private,
-        }
-
         [DllImport("libuv")]
         extern public static int uv_cancel(IntPtr req);
         [DllImport("libuv")]
@@ -171,15 +123,15 @@ namespace Libuv
         [DllImport("libuv")]
         extern public static int uv_timer_init(IntPtr loop, IntPtr handle);
         [DllImport("libuv")]
-        extern public static int uv_timer_start(IntPtr handle, TimerCb cb, long timeout, long repeat);
+        extern public static int uv_timer_start(IntPtr handle, TimerCb cb, ulong timeout, ulong repeat);
         [DllImport("libuv")]
         extern public static int uv_timer_stop(IntPtr handle);
         [DllImport("libuv")]
         extern public static int uv_timer_again(IntPtr handle);
         [DllImport("libuv")]
-        extern public static void uv_timer_set_repeat(IntPtr handle, long repeat);
+        extern public static void uv_timer_set_repeat(IntPtr handle, ulong repeat);
         [DllImport("libuv")]
-        extern public static long uv_timer_get_repeat(IntPtr handle);
+        extern public static ulong uv_timer_get_repeat(IntPtr handle);
 
         // Prepare handle
 
@@ -229,14 +181,6 @@ namespace Libuv
 
         // Poll handle
 
-        public enum PollEvent
-        {
-            Readable = 1,
-            Writable = 2,
-            Disconnect = 4,
-            Prioritized = 8
-        }
-
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void PollCb(IntPtr handle, int status, PollEvent events);
 
@@ -250,36 +194,6 @@ namespace Libuv
         extern public static int uv_poll_stop(IntPtr poll);
 
         // Signal handle
-
-        public enum Signal
-        {
-            // Win, Unix
-            SIGHUP = 1,
-            // Win, Unix
-            SIGINT = 2,
-            // Unix
-            SIGQUIT = 3,
-            // Win, Unix
-            SIGILL = 4,
-            // Win, Unix
-            SIGABRT = 6,
-            // Win, Unix
-            SIGFPE = 8,
-            // Win, Unix
-            SIGKILL = 9,
-            // Win, Unix
-            SIGSEGV = 11,
-            // Unix
-            SIGPIPE = 13,
-            // Unix
-            SIGALRM = 14,
-            // Win, Unix
-            SIGTERM = 15,
-            // Win
-            SIGBREAK = 21,
-            // Win
-            SIGWINCH = 28,
-        }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void SignalCb(IntPtr handle, Signal signum);
@@ -344,11 +258,6 @@ namespace Libuv
 
         // TCP handle
 
-        public enum TcpFlags
-        {
-            TcpIpv6only = 1
-        }
-
         [StructLayout(LayoutKind.Sequential)]
         public struct Sockaddr
         {
@@ -365,6 +274,21 @@ namespace Libuv
             public InAddr sin_addr;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
             public byte[] sin_zero;
+        }
+        [StructLayout(LayoutKind.Sequential)]
+        public struct In6Addr
+        {
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+            public byte[] s6_addr;   /* IPv6 address */
+        }
+        [StructLayout(LayoutKind.Sequential)]
+        public struct SockaddrIn6
+        {
+            public short sin6_family;   /* AF_INET6 */
+            public ushort sin6_port;     /* port number */
+            public uint sin6_flowinfo; /* IPv6 flow information */
+            public In6Addr sin6_addr;     /* IPv6 address */
+            public uint sin6_scope_id; /* Scope ID (new in 2.4) */
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -387,14 +311,183 @@ namespace Libuv
         [DllImport("libuv")]
         extern public static int uv_tcp_simultaneous_accepts(IntPtr handle, int enable);
         [DllImport("libuv")]
-        extern public static int uv_tcp_bind(IntPtr handle, [In] ref Sockaddr addr, TcpFlags flags);
+        extern public static int uv_tcp_bind(IntPtr handle, /*[In] ref Sockaddr*/IntPtr addr, TcpFlags flags);
         [DllImport("libuv")]
-        extern public static int uv_tcp_getsockname(IntPtr handle, [Out] ref Sockaddr[] name, [In, Out] ref int namelen);
+        extern public static int uv_tcp_getsockname(IntPtr handle, /*[Out] Sockaddr[]*/IntPtr name, [In, Out] ref int namelen);
         [DllImport("libuv")]
-        extern public static int uv_tcp_getpeername(IntPtr handle, [Out] ref Sockaddr[] name, [In, Out] ref int namelen);
+        extern public static int uv_tcp_getpeername(IntPtr handle, /*[Out] Sockaddr[]*/IntPtr name, [In, Out] ref int namelen);
         [DllImport("libuv")]
-        extern public static int uv_tcp_connect(IntPtr req, IntPtr handle, [In] ref Sockaddr addr, ConnectCb cb);
+        extern public static int uv_tcp_connect(IntPtr req, IntPtr handle, /*[In] ref Sockaddr*/IntPtr addr, ConnectCb cb);
 
+        // Pipe handle
+
+        [DllImport("libuv")]
+        extern public static int uv_pipe_init(IntPtr loop, IntPtr handle, int ipc);
+        [DllImport("libuv")]
+        extern public static int uv_pipe_open(IntPtr handle, /*uv_file*/int file);
+        [DllImport("libuv")]
+        extern public static int uv_pipe_bind(IntPtr handle, string name);
+        [DllImport("libuv")]
+        extern public static void uv_pipe_connect(IntPtr req, IntPtr handle, string name, ConnectCb cb);
+        [DllImport("libuv")]
+        extern public static int uv_pipe_getsockname(IntPtr handle, [Out] byte[] buffer, [In, Out] ref int size);
+        [DllImport("libuv")]
+        extern public static int uv_pipe_getpeername(IntPtr handle, [Out] byte[] buffer, [In, Out] ref int size);
+        [DllImport("libuv")]
+        extern public static void uv_pipe_pending_instances(IntPtr handle, int count);
+        [DllImport("libuv")]
+        extern public static int uv_pipe_pending_count(IntPtr handle);
+        [DllImport("libuv")]
+        extern public static int uv_pipe_chmod(IntPtr handle, PollEvent flags);
+
+        // TTY handle
+
+        [DllImport("libuv")]
+        extern public static int uv_tty_init(IntPtr loop, IntPtr handle, /*uv_file*/int fd, int readable);
+        [DllImport("libuv")]
+        extern public static int uv_tty_set_mode(IntPtr handle, TTYMode mode);
+        [DllImport("libuv")]
+        extern public static int uv_tty_reset_mode();
+        [DllImport("libuv")]
+        extern public static int uv_tty_get_winsize(IntPtr handle, out int width, out int height);
+
+        // UDP handle
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void UdpSendCb(IntPtr req, int status);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void UdpRecvCb(IntPtr handle, long nread, IntPtr buf, /*ref Sockaddr*/IntPtr addr, UdpFlags flags);
+
+
+        [DllImport("libuv")]
+        extern public static int uv_udp_init(IntPtr loop, IntPtr handle);
+        // flags -> AF_UNSPEC, AF_INET, AF_INET6
+        [DllImport("libuv")]
+        extern public static int uv_udp_init_ex(IntPtr loop, IntPtr handle, uint flags);
+        [DllImport("libuv")]
+        extern public static int uv_udp_open(IntPtr handle, /*uv_os_sock_t*/long sock);
+        [DllImport("libuv")]
+        extern public static int uv_udp_bind(IntPtr handle, /*[In] ref Sockaddr*/IntPtr addr, UdpFlags flags);
+        [DllImport("libuv")]
+        extern public static int uv_udp_getsockname(IntPtr handle, /*[Out] Sockaddr[]*/IntPtr name, [In, Out] ref int namelen);
+        [DllImport("libuv")]
+        extern public static int uv_udp_set_membership(IntPtr handle, string multicast_addr, string interface_addr, Membership membership);
+        [DllImport("libuv")]
+        extern public static int uv_udp_set_multicast_loop(IntPtr handle, int on);
+        [DllImport("libuv")]
+        extern public static int uv_udp_set_multicast_ttl(IntPtr handle, int ttl);
+        [DllImport("libuv")]
+        extern public static int uv_udp_set_multicast_interface(IntPtr handle, string interface_addr);
+        [DllImport("libuv")]
+        extern public static int uv_udp_set_broadcast(IntPtr handle, int on);
+        [DllImport("libuv")]
+        extern public static int uv_udp_set_ttl(IntPtr handle, int ttl);
+        [DllImport("libuv")]
+        extern public static int uv_udp_send(IntPtr req, IntPtr handle, [In] Buf[] bufs, uint nbufs, /*[In] ref Sockaddr*/IntPtr addr, UdpSendCb sendCb);
+        [DllImport("libuv")]
+        extern public static int uv_udp_try_send(IntPtr handle, [In] Buf[] bufs, uint nbufs, /*[In] ref Sockaddr*/IntPtr addr);
+        [DllImport("libuv")]
+        extern public static int uv_udp_recv_start(IntPtr handle, AllocCb allocCb, UdpRecvCb recvCb);
+        [DllImport("libuv")]
+        extern public static int uv_udp_recv_stop(IntPtr handle);
+        [DllImport("libuv")]
+        extern public static long uv_udp_get_send_queue_size(IntPtr handle);
+        [DllImport("libuv")]
+        extern public static long uv_udp_get_send_queue_count(IntPtr handle);
+
+        // FS Event handle
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void FsEventCb(IntPtr handle, string filename, FsEvent events, int status);
+
+        [DllImport("libuv")]
+        extern public static int uv_fs_event_init(IntPtr loop, IntPtr handle);
+        [DllImport("libuv")]
+        extern public static int uv_fs_event_start(IntPtr handle, FsEventCb cb, string path, FsEventFlags flags);
+        [DllImport("libuv")]
+        extern public static int uv_fs_event_stop(IntPtr handle);
+        [DllImport("libuv")]
+        extern public static int uv_fs_event_getpath(IntPtr handle, [Out] byte[] buffer, [In, Out] ref long size);
+
+        // FS Poll handle
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void FsPollCb(IntPtr handle, int status, ref Stat prev, ref Stat curr);
+
+        [DllImport("libuv")]
+        extern public static int uv_fs_poll_init(IntPtr loop, IntPtr handle);
+        [DllImport("libuv")]
+        extern public static int uv_fs_poll_start(IntPtr handle, FsPollCb pollCb, string path, uint interval);
+        [DllImport("libuv")]
+        extern public static int uv_fs_poll_stop(IntPtr handle);
+        [DllImport("libuv")]
+        extern public static int uv_fs_poll_getpath(IntPtr handle, [Out] byte[] buffer, [In, Out] ref long size);
+
+        // File system operations
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct Timespec
+        {
+            public long tv_sec;
+            public long tv_nsec;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct Stat
+        {
+            public ulong st_dev;
+            public ulong st_mode;
+            public ulong st_nlink;
+            public ulong st_uid;
+            public ulong st_gid;
+            public ulong st_rdev;
+            public ulong st_ino;
+            public ulong st_size;
+            public ulong st_blksize;
+            public ulong st_blocks;
+            public ulong st_flags;
+            public ulong st_gen;
+            public Timespec st_atim;
+            public Timespec st_mtim;
+            public Timespec st_ctim;
+            public Timespec st_birthtim;
+        }
+
+        // DNS utility functions
+        [StructLayout(LayoutKind.Sequential)]
+        public struct Addrinfo
+        {
+            public int ai_flags;
+            public int ai_family;
+            public int ai_socktype;
+            public int ai_protocol;
+            public ulong ai_addrlen;
+            public IntPtr ai_canonname;
+            public IntPtr ai_addr;
+            public IntPtr ai_next;
+        }
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void GetaddrinfoCb(IntPtr req, int status, IntPtr res);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void GetnameinfoCb(IntPtr req, int status, string hostname, string service);
+
+        [DllImport("libuv")]
+        extern public static int uv_getaddrinfo(IntPtr loop, IntPtr req, GetaddrinfoCb getaddrinfoCb, string node, string service, [In] ref Addrinfo hints);
+        [DllImport("libuv")]
+        extern public static void uv_freeaddrinfo(IntPtr ai);
+        // flags:
+        // - NI_NAMEREQD
+        // - NI_DGRAM
+        // - NI_NOFQDN
+        // - NI_NUMERICHOST
+        // - NI_NUMERICSERV
+        [DllImport("libuv")]
+        extern public static int uv_getnameinfo(IntPtr loop, IntPtr req, GetnameinfoCb getnameinfoCb, [In] ref Addrinfo addr, int flags);
+
+        // Shared library handling
+
+        // Threading and synchronization utilities
 
         // Miscellaneous utilities
 
@@ -404,5 +497,10 @@ namespace Libuv
             public IntPtr Base;
             public long Len;
         }
+        [DllImport("libuv")]
+        extern public static int uv_ip4_addr(string ip, int port, /*ref SockaddrIn*/IntPtr addr);
+        [DllImport("libuv")]
+        extern public static int uv_ip6_addr(string ip, int port, /*ref SockaddrIn6*/IntPtr addr);
+
     }
 }

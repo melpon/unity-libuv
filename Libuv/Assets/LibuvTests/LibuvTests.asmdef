@@ -1,0 +1,12 @@
+{
+    "name": "LibuvTests",
+    "references": [
+        "Libuv"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}
